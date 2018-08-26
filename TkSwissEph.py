@@ -334,7 +334,7 @@ class Chart:
         fraction = f"0\u00b0 0' {int((self.minute / 1440 + self.utc_time() / 24) * 236)}\""
         modify_utc = f"{int(self.utc_time())}\u00b0 {self.minute}\' 0\""
         jd = swe.sidtime(swe.julday(
-            self.year, self.month, self.day, 0 + 0))
+            self.year, self.month, self.day, 0))
         return self.dd_to_dms(
             self.dms_to_dd(converted_geo_longitude) +
             self.dms_to_dd(fraction) +
