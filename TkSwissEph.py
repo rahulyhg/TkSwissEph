@@ -111,8 +111,6 @@ button.grid(row=13, column=0, columnspan=4, pady=5)
 select_aspect, = create_label("Select aspect(s), that you want,\n to be drawn", column=2, padx=25, fg="red")
 select_midpoint, = create_label("Select midpoint(s), that you want,\n to be drawn", column=3, padx=25, fg="red")
 
-checkbutton_list = []
-
 
 def create_checkbutton(*args, column=2, dictionary, row=1):
     for i, j in enumerate(args):
@@ -185,6 +183,7 @@ class Chart:
         self.year = year
         self.month = month
         self.day = day
+
         if DAY_LIGHT_SAVE_TIME["DST (on/off)"][1].get() == "1":
             self.hour = hour - 1
         else:
@@ -192,6 +191,23 @@ class Chart:
         self.minute = minute
         self.longitude = longitude
         self.latitude = latitude
+        self.calender_variables = {"Julian": [self.year, self.month, self.day]}
+
+        self.julian_to_gregorian(0, 3, 3, 100, 3, 1, -2)
+        self.julian_to_gregorian(100, 3, 2, 200, 2, 29, -1)
+        self.julian_to_gregorian(200, 3, 1, 300, 2, 28, 0)
+        self.julian_to_gregorian(300, 2, 29, 500, 2, 27, 1)
+        self.julian_to_gregorian(500, 2, 28, 600, 2, 26, 2)
+        self.julian_to_gregorian(600, 2, 27, 700, 2, 25, 3)
+        self.julian_to_gregorian(700, 2, 26, 900, 2, 24, 4)
+        self.julian_to_gregorian(900, 2, 25, 1000, 2, 23, 5)
+        self.julian_to_gregorian(1000, 2, 24, 1100, 2, 22, 6)
+        self.julian_to_gregorian(1100, 2, 23, 1300, 2, 21, 7)
+        self.julian_to_gregorian(1300, 2, 22, 1400, 2, 20, 8)
+        self.julian_to_gregorian(1400, 2, 21, 1500, 2, 19, 9)
+        self.julian_to_gregorian(1500, 2, 20, 1582, 10, 4, 10)
+
+        self.calender_variables["Gregorian"] = [self.year, self.month, self.day]
 
         self.SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
                       "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
@@ -267,6 +283,73 @@ class Chart:
         second = float(dms.split(" ")[2]) / 3600
         return degree + minute + second
 
+    def julian_to_gregorian(self, year1, month1, day1, year2, month2, day2, count):
+        def if_self_month_equals_to_13():
+            if self.month == 13:
+                self.year += 1
+                self.month -= 12
+
+        if self.year == year1:
+            if self.month == month1:
+                if self.day > day1:
+                    self.day += count
+                    if self.day > 29:
+                        self.day -= 29
+                        self.month += 1
+            elif self.month > month1:
+                self.day += count
+                if self.month % 2 != 0 or self.month == 8:
+                    if self.day > 31:
+                        self.day -= 31
+                        self.month += 1
+                elif self.month % 2 == 0 and self.month != 8:
+                    if self.day > 30:
+                        self.day -= 30
+                        self.month += 1
+                        if_self_month_equals_to_13()
+        elif year1 < self.year < year2:
+            self.day += count
+            if self.month == 2:
+                if self.year % 4 == 0:
+                    if self.day > 29:
+                        self.day -= 29
+                        self.month += 1
+                elif self.year % 4 != 0:
+                    if self.day > 28:
+                        self.day -= 28
+                        self.month += 1
+            elif self.month % 2 != 0 or self.month == 8:
+                if self.day > 31:
+                    self.day -= 31
+                    self.month += 1
+            elif self.month % 2 == 0 and self.month != 8 and self.month != 2:
+                if self.day > 30:
+                    self.day -= 30
+                    self.month += 1
+                    if_self_month_equals_to_13()
+        elif self.year == year2:
+            if self.month == month2:
+                if self.day > day2:
+                    self.day += count
+                    if self.day > 30:
+                        self.day -= 30
+                        self.month += 1
+            elif self.month < month2:
+                self.day += count
+                if self.month == 2:
+                    if self.day > 29:
+                        self.day -= 29
+                        self.month += 1
+                elif self.month % 2 != 0 or self.month == 8:
+                    if self.day > 31:
+                        self.day -= 31
+                        self.month += 1
+                elif self.month % 2 == 0 and self.month != 8 and self.month != 2:
+                    if self.day > 30:
+                        self.day -= 30
+                        self.month += 1
+                        if_self_month_equals_to_13()
+
     def utc_time(self):
         longitude = int(self.longitude)
         hour = float(self.hour)
@@ -336,7 +419,7 @@ class Chart:
         fraction = f"0\u00b0 0' {int((self.minute / 1440 + self.utc_time() / 24) * 236)}\""
         modify_utc = f"{int(self.utc_time())}\u00b0 {self.minute}\' 0\""
         jd = swe.sidtime(swe.julday(
-            self.year, self.month, self.day, 0 + 0))
+            self.year, self.month, self.day, 0))
         return self.dd_to_dms(
             self.dms_to_dd(converted_geo_longitude) +
             self.dms_to_dd(fraction) +
@@ -852,7 +935,20 @@ class Chart:
                 else:
                     text_object(x=x + 15 + (i * 25), y=420 + (i * 15) + ((k + 1) * 15), _text=m, font="Arial 10")
 
+    def chart_info_data(self, calender="Julian"):
+        return "\n".join(
+            [
+                f"{self.day}.{self.month}.{self.year} ({calender})",
+                f"{self.hour}:{self.minute}",
+                f"{int(self.utc_time())}:{self.minute}",
+                f"""{self.sidereal_time().replace('"', '').replace("'", '').replace("°", "").replace(" ", ":")}""",
+                f"{self.latitude}",
+                f"{self.longitude}"
+            ]
+        )
+
     def draw_chart_info(self):
+        variables = self.calender_variables["Julian"]
         chart_info_titles = "\n".join(
             [
                 "Date:",
@@ -865,7 +961,7 @@ class Chart:
         )
         chart_info_datas = "\n".join(
             [
-                f"{self.day}.{self.month}.{self.year}",
+                f"{variables[2]}.{variables[1]}.{variables[0]}",
                 f"{self.hour}:{self.minute}",
                 f"{int(self.utc_time())}:{self.minute}",
                 f"""{self.sidereal_time().replace('"', '').replace("'", '').replace("°", "").replace(" ", ":")}""",
