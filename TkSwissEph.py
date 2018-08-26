@@ -111,8 +111,6 @@ button.grid(row=13, column=0, columnspan=4, pady=5)
 select_aspect, = create_label("Select aspect(s), that you want,\n to be drawn", column=2, padx=25, fg="red")
 select_midpoint, = create_label("Select midpoint(s), that you want,\n to be drawn", column=3, padx=25, fg="red")
 
-checkbutton_list = []
-
 
 def create_checkbutton(*args, column=2, dictionary, row=1):
     for i, j in enumerate(args):
