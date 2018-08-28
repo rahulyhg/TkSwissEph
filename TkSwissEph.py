@@ -48,17 +48,17 @@ def create_canvas(master):
     return canvas
 
 
-def create_label(*args, column, padx=1, bg="white", fg="black", row=0):
+def create_label(*args, column, padx=1, bg="white", fg="black", row=0, columnspan=1):
     for i, j in enumerate(args):
         label = tk.Label(master=root, text=j, bg=bg, fg=fg)
-        label.grid(row=i + row, column=column, sticky="nw", padx=padx)
+        label.grid(row=i + row, column=column, sticky="nw", padx=padx, columnspan=columnspan)
         yield label
 
 
-def create_entry(n, column, row=0):
+def create_entry(n, column, row=0, columnspan=1):
     for i in range(n):
         entry = tk.Entry(master=root, width=6)
-        entry.grid(row=i + row, column=column)
+        entry.grid(row=i + row, column=column, columnspan=columnspan)
         yield entry
 
 
@@ -108,43 +108,72 @@ button = tk.Button(master=root, text="Generate Chart", bg="white",
                    activeforeground="black", activebackground="white")
 button.grid(row=13, column=0, columnspan=4, pady=5)
 
-select_aspect, = create_label("Select aspect(s), that you want,\n to be drawn", column=2, padx=25, fg="red")
-select_midpoint, = create_label("Select midpoint(s), that you want,\n to be drawn", column=3, padx=25, fg="red")
+select_aspect, = create_label("Select aspect(s), that you want,\n to be drawn",
+                              column=2, padx=25, fg="red", columnspan=2)
+select_midpoint, = create_label("Select midpoint(s), that you want,\n to be drawn", column=4, padx=25, fg="red")
 
 
-def create_checkbutton(*args, column=2, dictionary, row=1):
+def create_checkbutton(*args, column=2, dictionary, row=1, padx=25):
     for i, j in enumerate(args):
         var = tk.StringVar()
         checkbutton = tk.Checkbutton(master=root, bg="white", text=j, activebackground="white",
                                      activeforeground="black", variable=var)
         var.set("0")
         dictionary[j] = [checkbutton, var]
-        checkbutton.grid(row=i + row, column=column, sticky="nw", padx=25)
+        checkbutton.grid(row=i + row, column=column, sticky="nw", padx=padx)
 
 
-create_checkbutton(*list(ASPECT_SYMBOLS.keys()), column=2, dictionary=ENABLED_ASPECTS)
-create_checkbutton("Midpoint", column=3, dictionary=MIDPOINT)
+create_checkbutton(*list(ASPECT_SYMBOLS.keys()), column=2, dictionary=ENABLED_ASPECTS, padx=0)
+create_checkbutton("Midpoint", column=4, dictionary=MIDPOINT, padx=50)
 create_checkbutton("DST (on/off)", column=1, dictionary=DAY_LIGHT_SAVE_TIME, row=11)
+
+labels = {}
+entries = {}
+
+
+def extend_aspect_checkbutton():
+    for i, j in enumerate(ASPECT_SYMBOLS.keys()):
+        try:
+            if ENABLED_ASPECTS[j][1].get() == "1":
+                if j not in labels.keys():
+                    entry, = create_entry(n=1, column=3, row=i + 1, columnspan=1)
+                    label, = create_label("%", column=4, padx=1, fg="red", row=i + 1)
+                    labels[j] = label
+                    entries[j] = entry
+        except KeyError:
+            pass
+    for i in labels.keys():
+        if ENABLED_ASPECTS[i][1].get() == "0":
+            labels[i].destroy()
+            entries[i].destroy()
+            labels.pop(i)
+            entries.pop(i)
+            break
 
 
 def extend_midpoint_checkbutton():
     global label1, label2
+    planets = list(PLANETS.keys())
+    planets.append("Asc")
+    planets.append("Mc")
     button.grid_forget()
-    button.grid(row=13, column=0, columnspan=6, pady=5)
+    button.grid(row=15, column=0, columnspan=6, pady=5)
     if MIDPOINT["Midpoint"][1].get() == "1":
-        label1, = create_label("Midpoints of a planet", column=4, padx=25, fg="red")
-        label2, = create_label("Aspects to another planet", column=5, padx=25, fg="red")
-        create_checkbutton(*list(PLANETS.keys()), column=4, dictionary=FROM_WHICH_PLANET)
-        create_checkbutton(*list(PLANETS.keys()), column=5, dictionary=TO_WHICH_PLANET)
+        label1, = create_label("Midpoints of a planet", column=5, padx=25, fg="red")
+        label2, = create_label("Aspects to another planet", column=6, padx=25, fg="red")
+        create_checkbutton(*planets, column=5, dictionary=FROM_WHICH_PLANET)
+        create_checkbutton(*planets, column=6, dictionary=TO_WHICH_PLANET)
     else:
         label1.destroy()
         label2.destroy()
-        for i in PLANETS:
+        for i in planets:
             FROM_WHICH_PLANET[i][0].destroy()
             TO_WHICH_PLANET[i][0].destroy()
 
 
 MIDPOINT["Midpoint"][0].configure(command=extend_midpoint_checkbutton)
+for i in ASPECT_SYMBOLS.items():
+    ENABLED_ASPECTS[i[0]][0].configure(command=extend_aspect_checkbutton)
 
 
 def oval_object(x, y, r, dash=True):
@@ -183,7 +212,6 @@ class Chart:
         self.year = year
         self.month = month
         self.day = day
-
         if DAY_LIGHT_SAVE_TIME["DST (on/off)"][1].get() == "1":
             self.hour = hour - 1
         else:
@@ -192,7 +220,6 @@ class Chart:
         self.longitude = longitude
         self.latitude = latitude
         self.calender_variables = {"Julian": [self.year, self.month, self.day]}
-
         self.julian_to_gregorian(0, 3, 3, 100, 3, 1, -2)
         self.julian_to_gregorian(100, 3, 2, 200, 2, 29, -1)
         self.julian_to_gregorian(200, 3, 1, 300, 2, 28, 0)
@@ -206,9 +233,7 @@ class Chart:
         self.julian_to_gregorian(1300, 2, 22, 1400, 2, 20, 8)
         self.julian_to_gregorian(1400, 2, 21, 1500, 2, 19, 9)
         self.julian_to_gregorian(1500, 2, 20, 1582, 10, 4, 10)
-
         self.calender_variables["Gregorian"] = [self.year, self.month, self.day]
-
         self.SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
                       "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
         self.SIGN_SYMBOLS = ["\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D",
@@ -235,6 +260,7 @@ class Chart:
         self.ASPECT_SYMBOLS["Null"] = " "
         self.ASPECTS = {i: [] for i in self.PLANETS.keys()}
         self.MIDPOINTS = {}
+        self.ORB_FACTORS = {}
         self.CONJUNCTION = []
         self.SEMI_SEXTILE = []
         self.SEMI_SQUARE = []
@@ -251,7 +277,6 @@ class Chart:
         self.MIDPOINT_OF_HOUSES = []
         self.PLANET_INFO_FORMAT = []
         self.HOUSE_INFO_FORMAT = []
-
         self.draw_oval_object()
         self.draw_line_object()
         self.draw_houses()
@@ -725,37 +750,90 @@ class Chart:
             pass
 
     def select_aspect(self, aspect, value, planet_degrees, key, _key):
-        if 0 < aspect < 10 or 350 < aspect < 360:
+        default_conjunction = 10
+        default_semi_sextile = 2
+        default_semi_square = 2
+        default_sextile = 10
+        default_quintile = 2
+        default_square = 10
+        default_trine = 10
+        default_sesquiquadrate = 2
+        default_biquintile = 2
+        default_quincunx = 3
+        default_opposite = 10
+        if "Conjunction" in entries.keys():
+            if entries["Conjunction"].get().isnumeric():
+                default_conjunction = int(entries["Conjunction"].get()) / 10
+        elif "Semi-Sextile" in entries.keys():
+            if entries["Semi-Sextile"].get().isnumeric():
+                default_semi_sextile = int(entries["Semi-Sextile"].get()) / 10
+        elif "Semi-Square" in entries.keys():
+            if entries["Semi-Square"].get().isnumeric():
+                default_semi_square = int(entries["Semi-Square"].get()) / 10
+        elif "Sextile" in entries.keys():
+            if entries["Sextile"].get().isnumeric():
+                default_sextile = int(entries["Sextile"].get()) / 10
+        elif "Quintile" in entries.keys():
+            if entries["Quintile"].get().isnumeric():
+                default_quintile = int(entries["Quintile"].get()) / 10
+        elif "Square" in entries.keys():
+            if entries["Square"].get().isnumeric():
+                default_square = int(entries["Square"].get()) / 10
+        elif "Trine" in entries.keys():
+            if entries["Trine"].get().isnumeric():
+                default_trine = int(entries["Trine"].get()) / 10
+        elif "Sesquiquadrate" in entries.keys():
+            if entries["Sesquiquadrate"].get().isnumeric():
+                default_sesquiquadrate = int(entries["Sesquiquadrate"].get()) / 10
+        elif "Biquintile" in entries.keys():
+            if entries["Biquintile"].get().isnumeric():
+                default_biquintile = int(entries["Biquintile"].get()) / 10
+        elif "Quincunx" in entries.keys():
+            if entries["Quincunx"].get().isnumeric():
+                default_quincunx = int(entries["Quincunx"].get()) / 10
+        elif "Opposite" in entries.keys():
+            if entries["Opposite"].get().isnumeric():
+                default_opposite = int(entries["Opposite"].get()) / 10
+        if 0 < aspect < default_conjunction or 360 - default_conjunction < aspect < 360:
             self.CONJUNCTION.append((key, self.ASPECT_SYMBOLS["Conjunction"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Conjunction", "red")
-        elif 28 < aspect < 32 or 328 < aspect < 332:
+        elif 30 - default_semi_sextile < aspect < 30 + default_semi_sextile or \
+                330 - default_semi_sextile < aspect < 330 + default_semi_sextile:
             self.SEMI_SEXTILE.append((key, self.ASPECT_SYMBOLS["Semi-Sextile"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Semi-Sextile", "black")
-        elif 43 < aspect < 47 or 313 < aspect < 347:
+        elif 45 - default_semi_square < aspect < 45 + default_semi_square or \
+                315 - default_semi_square < aspect < 315 + default_semi_square:
             self.SEMI_SQUARE.append((key, self.ASPECT_SYMBOLS["Semi-Square"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Semi-Square", "black")
-        elif 50 < aspect < 70 or 290 < aspect < 310:
+        elif 60 - default_sextile < aspect < 60 + default_sextile or \
+                300 - default_sextile < aspect < 300 + default_sextile:
             self.SEXTILE.append((key, self.ASPECT_SYMBOLS["Sextile"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Sextile", "blue")
-        elif 70 < aspect < 74 or 286 < aspect < 290:
+        elif 72 - default_quintile < aspect < 72 + default_quintile or \
+                288 - default_quintile < aspect < 288 + default_quintile:
             self.QUINTILE.append((key, self.ASPECT_SYMBOLS["Quintile"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Quintile", "purple")
-        elif 80 < aspect < 100 or 260 < aspect < 280:
+        elif 90 - default_square < aspect < 90 + default_square or \
+                270 - default_square < aspect < 270 + default_square:
             self.SQUARE.append((key, self.ASPECT_SYMBOLS["Square"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Square", "red")
-        elif 110 < aspect < 130 or 230 < aspect < 250:
+        elif 120 - default_trine < aspect < 120 + default_trine or \
+                240 - default_trine < aspect < 240 + default_trine:
             self.TRINE.append((key, self.ASPECT_SYMBOLS["Trine"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Trine", "blue")
-        elif 133 < aspect < 137 or 223 < aspect < 227:
+        elif 135 - default_sesquiquadrate < aspect < 135 + default_sesquiquadrate or \
+                225 - default_sesquiquadrate < aspect < 225 + default_sesquiquadrate:
             self.SESQUIQUADRATE.append((key, self.ASPECT_SYMBOLS["Sesquiquadrate"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Sesquiquadrate", "orange")
-        elif 142 < aspect < 146 or 202 < aspect < 206:
+        elif 144 - default_biquintile < aspect < 144 + default_biquintile or \
+                204 - default_biquintile < aspect < 204 + default_biquintile:
             self.BIQUINTILE.append((key, self.ASPECT_SYMBOLS["BiQuintile"], _key))
             self.if_enabled_aspects(planet_degrees, value, "BiQuintile", "gray")
-        elif 147 < aspect < 153 or 207 < aspect < 213:
+        elif 150 - default_quincunx < aspect < 150 + default_quincunx or \
+                210 - default_quincunx < aspect < 210 + default_quincunx:
             self.QUINCUNX.append((key, self.ASPECT_SYMBOLS["Quincunx"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Quincunx", "pink")
-        elif 170 < aspect < 190:
+        elif 180 - default_opposite < aspect < 180 + default_opposite:
             self.OPPOSITE.append((key, self.ASPECT_SYMBOLS["Opposite"], _key))
             self.if_enabled_aspects(planet_degrees, value, "Opposite", "red")
         else:
@@ -763,6 +841,8 @@ class Chart:
 
     def draw_aspects(self):
         planet_degrees = {i: j for i, j in zip(self.PLANETS, self.PLANET_DEGREES)}
+        planet_degrees["Asc"] = self.MIDPOINT_OF_HOUSES[0]
+        planet_degrees["Mc"] = self.MIDPOINT_OF_HOUSES[9]
         for key, value in planet_degrees.items():
             for _key, _value in planet_degrees.items():
                 aspect = abs(value - _value)
@@ -774,10 +854,13 @@ class Chart:
                         self.select_aspect(aspect, value, _value, key, _key)
 
     def draw_midpoints(self, offset=6):
+        planet_symbols = self.PLANET_SYMBOLS
+        planet_symbols["Asc"] = "Asc"
+        planet_symbols["Mc"] = "Mc"
         for i, j in self.MIDPOINTS.items():
             x1, y1, x2, y2 = self.x_y(angle=j, r1=280, r2=285)
             text_object(x=offset + (x1 + x2) / 2, y=offset + (y1 + y2) / 2,
-                        _text=f"{self.PLANET_SYMBOLS[i[0]]}/{self.PLANET_SYMBOLS[i[1]]}")
+                        _text=f"{planet_symbols[i[0]]}/{planet_symbols[i[1]]}")
             x1, y1, x2, y2 = self.x_y(angle=j, r1=260, r2=270)
             line_object(x1, y1, x2, y2, width=2, fill="red")
 
