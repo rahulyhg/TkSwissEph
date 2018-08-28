@@ -740,9 +740,19 @@ class Chart:
             if FROM_WHICH_PLANET[key][1].get() == "1":
                 for i in TO_WHICH_PLANET.keys():
                     if TO_WHICH_PLANET[i][1].get() == "1":
-                        if _value < 30:
-                            _value += 360
+                        if value < _value:
+                            if _value - value < 180:
+                                value += 0
+                            elif _value - value > 180:
+                                value += 360
+                        elif value > _value:
+                            if value - _value < 180:
+                                _value += 0
+                            elif value - _value > 180:
+                                _value += 360
                         midpoint_aspect = (value + _value) / 2
+                        if midpoint_aspect > 360:
+                            midpoint_aspect -= 360
                         diff = abs(planet_degrees[i] - midpoint_aspect)
                         self.MIDPOINTS[key, _key] = midpoint_aspect
                         self.select_aspect(diff, planet_degrees[i], midpoint_aspect, key, f"{key}/{_key}")
