@@ -15,11 +15,11 @@ When users click the check button of <b>Midpoint</b>, the window is extended and
        
 ### Bugs:
 
-    1. An IndexError raises between the years of 750 and 1000.
+    1. An IndexError raises after 30.12.4615 and between the years of 750 and 1000.
     
     2. Chiron's ephemeris is restricted to JD 1958470.5 
        (Friday, A.D. 650 Jan 1) - JD 3419437.5 (Tuesday, A.D. 4650 Jan 1)
-       Before 01.01.650, the Chiron can not be displayed and the image is distorted.
+       Before 01.01.650 and after 14615, the Chiron can not be displayed and the image is distorted.
  
 ### Unix
 ![unix_mainmenu_1](https://user-images.githubusercontent.com/29302909/44623988-a17cf480-a8e8-11e8-9612-cef19e4e4289.png)
