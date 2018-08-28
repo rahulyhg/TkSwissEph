@@ -435,23 +435,6 @@ class Chart:
         deltat = swe.deltat(jd)
         return round(jd + deltat, 6)
 
-    def sidereal_time(self):
-        longitude = str(self.longitude).split(".")
-        longitude = " ".join(longitude)
-        longitude += " 0"
-        converted_geo_longitude = str(round(self.dms_to_dd(longitude) * 4, 2)).split(".")
-        converted_geo_longitude = f"0\u00b0 {converted_geo_longitude[0]}' {converted_geo_longitude[1]}\""
-        fraction = f"0\u00b0 0' {int((self.minute / 1440 + self.utc_time() / 24) * 236)}\""
-        modify_utc = f"{int(self.utc_time())}\u00b0 {self.minute}\' 0\""
-        jd = swe.sidtime(swe.julday(
-            self.year, self.month, self.day, 0))
-        return self.dd_to_dms(
-            self.dms_to_dd(converted_geo_longitude) +
-            self.dms_to_dd(fraction) +
-            self.dms_to_dd(modify_utc) +
-            jd
-        )
-
     @staticmethod
     def convert_angle(angle):
         if 0 < angle < 30:
@@ -1033,8 +1016,6 @@ class Chart:
             [
                 f"{self.day}.{self.month}.{self.year} ({calender})",
                 f"{self.hour}:{self.minute}",
-                f"{int(self.utc_time())}:{self.minute}",
-                f"""{self.sidereal_time().replace('"', '').replace("'", '').replace("°", "").replace(" ", ":")}""",
                 f"{self.latitude}",
                 f"{self.longitude}"
             ]
@@ -1046,8 +1027,6 @@ class Chart:
             [
                 "Date:",
                 "Time:",
-                "Universal Time:",
-                "Sidereal Time:",
                 "Latitude:",
                 "Longitude:",
             ]
@@ -1056,8 +1035,6 @@ class Chart:
             [
                 f"{variables[2]}.{variables[1]}.{variables[0]}",
                 f"{self.hour}:{self.minute}",
-                f"{int(self.utc_time())}:{self.minute}",
-                f"""{self.sidereal_time().replace('"', '').replace("'", '').replace("°", "").replace(" ", ":")}""",
                 f"{self.latitude}",
                 f"{self.longitude}"
             ]
