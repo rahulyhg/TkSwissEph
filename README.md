@@ -5,9 +5,14 @@ Click the check button(s) of the aspect(s), that you want, to drawn.
 
 When users click the check button of <b>Midpoint</b>, the window is extended and two check button groups for planets will be created. The left check button group is for choosing the midpoints of a planet. You can select many planets but remember that a lot of text will be inserted on the image. The right check button group is for choosing a planet that whether it has an aspect to the midpoint of the first checked planet.
 
-#### Note:
-Note that the chart can only drawn, if the executable file and the Eph folder are in the same directory.
+### Notes:
 
+    1. Note that the chart can only drawn, if the executable file and the Eph folder 
+       are in the same directory.
+
+    2. Note that, the chart can only drawn, if the latitude is between -66.55 and 66.55 
+       in decimal and if the longitude is between -180.99 and 180.99 in decimal.
+ 
 ### Unix
 ![unix_mainmenu_1](https://user-images.githubusercontent.com/29302909/44623988-a17cf480-a8e8-11e8-9612-cef19e4e4289.png)
 
