@@ -19,7 +19,7 @@ When users click the check button of <b>Midpoint</b>, the window is extended and
     
     2. Chiron's ephemeris is restricted to JD 1958470.5 
        (Friday, A.D. 650 Jan 1) - JD 3419437.5 (Tuesday, A.D. 4650 Jan 1)
-       Before 01.01.650 and after 01.04.615, Chiron can not be displayed and the image is distorted.
+       Before 01.01.650 and after 01.04.615, Chiron can not be displayed.
  
 ### Unix
 ![unix_mainmenu_1](https://user-images.githubusercontent.com/29302909/44623988-a17cf480-a8e8-11e8-9612-cef19e4e4289.png)
