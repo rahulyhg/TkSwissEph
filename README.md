@@ -13,12 +13,12 @@ When users click the check button of <b>Midpoint</b>, the window is extended and
     2. Note that, the chart can only drawn, if the latitude is between -66.55 and 66.55 
        in decimal and if the longitude is between -180.99 and 180.99 in decimal.
        
+    3. Chiron's ephemeris is restricted to JD 1958470.5 
+       (Friday, A.D. 650 Jan 1) - JD 3419437.5 (Tuesday, A.D. 4650 Jan 1)
+       
 ### Bugs:
 
     1. An IndexError raises after 30.12.4615 and between the years of 750 and 1000.
-    
-    2. Chiron's ephemeris is restricted to JD 1958470.5 
-       (Friday, A.D. 650 Jan 1) - JD 3419437.5 (Tuesday, A.D. 4650 Jan 1)
  
 ### Unix
 ![unix_mainmenu_1](https://user-images.githubusercontent.com/29302909/44623988-a17cf480-a8e8-11e8-9612-cef19e4e4289.png)
