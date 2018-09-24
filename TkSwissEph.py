@@ -32,7 +32,7 @@ def create_toplevel():
     if toplevel is not None:
         toplevel.destroy()
     toplevel = tk.Toplevel()
-    toplevel.resizable(width=False, height="False")
+    toplevel.resizable(width=False, height=False)
     toplevel.title("TkSwissEph")
     if os.name == "nt":
         toplevel.iconbitmap(source_path("TkSwissEph.ico"))
