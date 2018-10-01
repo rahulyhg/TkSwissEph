@@ -18,8 +18,8 @@ When users click the check button of <b>Midpoint</b>, the window is extended and
        
 ### Bugs:
 
-    1. An IndexError raises after 30.12.4615 and between the years of 750 and 1000.
- 
+    1. Unfortunately an index error raises in some dates that I don't know why that error occurs.
+    
 ### Unix
 ![unix_mainmenu_1](https://user-images.githubusercontent.com/29302909/44623988-a17cf480-a8e8-11e8-9612-cef19e4e4289.png)
 
